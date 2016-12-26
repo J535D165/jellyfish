@@ -1,3 +1,4 @@
+import re
 import unicodedata
 from collections import defaultdict
 from .compat import _range, _zip_longest, IS_PY3
@@ -162,13 +163,18 @@ def jaro_winkler(s1, s2, long_tolerance=False):
 
 
 def soundex(s):
-    if not s:
-        return s
 
     _check_type(s)
 
     s = _normalize(s)
     s = s.upper()
+
+    # replace all non-alpha characters with whitespace and strip
+    s = re.sub(r'[^A-Z]', ' ', s)
+    s = s.strip()
+
+    if not s:
+        return ''
 
     replacements = (('BFPV', '1'),
                     ('CGJKQSXZ', '2'),
@@ -200,8 +206,7 @@ def soundex(s):
         if count == 4:
             break
 
-    result += '0'*(4-count)
-    return ''.join(result)
+    return ''.join(result).ljust(4, '0')
 
 
 def hamming_distance(s1, s2):
